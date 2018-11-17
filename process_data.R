@@ -265,13 +265,9 @@ final <- df2 %>%
                                             "Not at all likely")),
          Race = factor(Race, levels = c("White", "Hispanic", "Black", "Asian", "Other")))
 
-# Write the data where the app can read it
+# Write the data where R and the app can read it
 write_rds(final, "upshot/data.rds")
 write_rds(final, "data.rds")
-
-# Make a model
-# model <- lmList(data = final, error ~ p_ethn | ethn)
-# summary(model)
 
 # Test plot
 ggplot(final, aes(p_gender, Error, group = Gender)) +
@@ -279,5 +275,3 @@ ggplot(final, aes(p_gender, Error, group = Gender)) +
   scale_color_manual(values=c("#009E73", "#f45642")) +
   geom_smooth(method = lm, se = FALSE) +
   facet_wrap(~ Gender)
-  # scale_x_continuous(limits = c(0, 1)) +
-  # scale_y_continuous(limits = c(0, .2))
