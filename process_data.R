@@ -241,22 +241,35 @@ df2 <- all %>%
   select(-win_name)
 
 # Gather the category variables
-test <- df2 %>% 
+final <- df2 %>% 
   group_by(race) %>% 
   gather(educ, p_educ, c("Bachelors' degree", "Grade school", "Graduate or Professional Degree", "High school", "Some college or trade school")) %>% 
   gather(gender, p_gender, c("Male", "Female")) %>% 
   gather(likely, p_likely, c("Almost certain", "Already voted", "Not at all likely", "Not very likely", "Somewhat likely", "Very likely")) %>% 
   gather(ethn, p_ethn, c("Asian", "Black", "Hispanic", "Other", "White")) %>% 
   gather(age, p_age, c("18 to 29", "30 to 44", "45 to 64", "65 and older")) %>% 
-  ungroup()
+  ungroup() %>% 
+
+# Clean up the variables names for the Shiny app
+  mutate(prediction = case_when(
+    prediction == "correct" ~ "Correct",
+    prediction == "incorrect" ~ "Incorrect")) %>% 
+  mutate(District = race, Error = error, Prediction = prediction, Education = educ, `Percent (Education)` = p_educ, Gender = gender,
+         `Percent (Gender)` = p_gender, Likely = likely, `Percent (Likely)` = p_likely, Race = ethn, `Percent (Race)` = p_ethn,
+         Age = age, `Percent (Age)` = p_age) %>% 
+  select(District, Error, Prediction, Education, `Percent (Education)`, Gender, `Percent (Gender)`, Likely, `Percent (Likely)`,
+         Race, `Percent (Race)`, Age, `Percent (Age)`)
+
+# Write the data where the app can read it
+write_rds(final, "upshot/data.rds")
+write_rds(final, "data.rds")
 
 # Make a model
-mod <- lmList(data = test, error ~ p_ethn | ethn)
-get_regression_table(mod)
-
+model <- lmList(data = final, error ~ p_ethn | ethn)
+summary(model)
 
 # Test plot
-ggplot(test, aes(p_ethn, error, group = ethn)) +
+ggplot(final, aes(p_ethn, error, group = ethn)) +
   geom_point(aes(col = prediction)) +
   scale_color_manual(values=c("#009E73", "#f45642")) +
   geom_smooth(method = lm, se = FALSE) +
