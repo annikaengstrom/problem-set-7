@@ -254,25 +254,30 @@ final <- df2 %>%
   mutate(prediction = case_when(
     prediction == "correct" ~ "Correct",
     prediction == "incorrect" ~ "Incorrect")) %>% 
-  mutate(District = race, Error = error, Prediction = prediction, Education = educ, `Percent (Education)` = p_educ, Gender = gender,
-         `Percent (Gender)` = p_gender, Likely = likely, `Percent (Likely)` = p_likely, Race = ethn, `Percent (Race)` = p_ethn,
-         Age = age, `Percent (Age)` = p_age) %>% 
-  select(District, Error, Prediction, Education, `Percent (Education)`, Gender, `Percent (Gender)`, Likely, `Percent (Likely)`,
-         Race, `Percent (Race)`, Age, `Percent (Age)`)
+  mutate(District = race, Error = error, Prediction = prediction, Education = educ, Gender = gender,
+         Likely = likely, Race = ethn,  Age = age) %>% 
+  select(District, Error, Prediction, Age, Education, Gender, Likely, Race, p_educ, p_gender, p_likely, p_ethn, p_age) %>% 
+
+# Fix the factor levels so the facets display correctly
+  mutate(Education = factor(Education, levels = c("Grade school", "High school", "Some college or trade school",
+                                                  "Bachelors' degree", "Graduate or Professional Degree")),
+         Likely = factor(Likely, levels = c("Already voted", "Almost certain", "Very likely", "Somewhat likely", "Not very likely",
+                                            "Not at all likely")),
+         Race = factor(Race, levels = c("White", "Hispanic", "Black", "Asian", "Other")))
 
 # Write the data where the app can read it
 write_rds(final, "upshot/data.rds")
 write_rds(final, "data.rds")
 
 # Make a model
-model <- lmList(data = final, error ~ p_ethn | ethn)
-summary(model)
+# model <- lmList(data = final, error ~ p_ethn | ethn)
+# summary(model)
 
 # Test plot
-ggplot(final, aes(p_ethn, error, group = ethn)) +
-  geom_point(aes(col = prediction)) +
+ggplot(final, aes(p_gender, Error, group = Gender)) +
+  geom_point(aes(col = Prediction)) +
   scale_color_manual(values=c("#009E73", "#f45642")) +
   geom_smooth(method = lm, se = FALSE) +
-  facet_wrap(~ ethn) +
-  scale_x_continuous(limits = c(0, 1)) +
-  scale_y_continuous(limits = c(0, .2))
+  facet_wrap(~ Gender)
+  # scale_x_continuous(limits = c(0, 1)) +
+  # scale_y_continuous(limits = c(0, .2))
