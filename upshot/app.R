@@ -1,3 +1,8 @@
+#
+# This Shiny app shows how predictive polling error varies with population characteristics
+# (within the polled population and between the polled and actual populations).
+#
+
 library(shiny)
 library(tidyverse)
 library(rsconnect)

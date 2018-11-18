@@ -1,3 +1,8 @@
+#
+# This file downloads and cleans data to be used by the first tab of the Shiny app,
+# which shows how predictive error varies with polled population characteristics.
+#
+
 library(tidyverse)
 library(fs)
 library(readxl)
