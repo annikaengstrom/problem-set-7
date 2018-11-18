@@ -228,43 +228,41 @@ all[is.na(all)] <- 0
 df2 <- all %>%
   filter(! win_party == "UNDECIDED") %>% 
   select(-o_percent.a, -o_percent.p) %>% 
-
-# Make new variables that represent the polling accuracy and win prediction
+  
+# Make new variables that represent the polling accuracy
   mutate(win_party.a = win_party,
          win_party.p = case_when(
-          d_percent.p > r_percent.p ~ "D",
-          r_percent.p > d_percent.p ~ "R")) %>%
+           d_percent.p > r_percent.p ~ "D",
+           r_percent.p > d_percent.p ~ "R")) %>%
   mutate(error = abs(r_percent.a - r_percent.p) + abs(d_percent.a - d_percent.p)) %>% 
-  mutate(prediction = case_when(
-    win_party.a == win_party.p ~ "correct",
-    win_party.a != win_party.p ~ "incorrect")) %>% 
-  select(-win_name)
+  mutate(Prediction = case_when(
+    win_party.a == win_party.p ~ "Correct",
+    win_party.a != win_party.p ~ "Incorrect")) %>% 
+  select(-win_name) %>% 
 
-# Gather the category variables
-final <- df2 %>% 
-  group_by(race) %>% 
-  gather(educ, p_educ, c("Bachelors' degree", "Grade school", "Graduate or Professional Degree", "High school", "Some college or trade school")) %>% 
-  gather(gender, p_gender, c("Male", "Female")) %>% 
-  gather(likely, p_likely, c("Almost certain", "Already voted", "Not at all likely", "Not very likely", "Somewhat likely", "Very likely")) %>% 
-  gather(ethn, p_ethn, c("Asian", "Black", "Hispanic", "Other", "White")) %>% 
-  gather(age, p_age, c("18 to 29", "30 to 44", "45 to 64", "65 and older")) %>% 
-  ungroup() %>% 
+# Add together the education variables
+  mutate(lesscollege = `Grade school` + `High school` + `Some college or trade school`) %>% 
+  select(win_party, race, d_percent.a, r_percent.a, d_percent.p, r_percent.p,
+         Female, White, Hispanic, Black, `65 and older`, lesscollege, Prediction)
 
-# Clean up the variables names for the Shiny app
-  mutate(prediction = case_when(
-    prediction == "correct" ~ "Correct",
-    prediction == "incorrect" ~ "Incorrect")) %>% 
-  mutate(District = race, Error = error, Prediction = prediction, Education = educ, Gender = gender,
-         Likely = likely, Race = ethn,  Age = age) %>% 
-  select(District, Error, Prediction, Age, Education, Gender, Likely, Race, p_educ, p_gender, p_likely, p_ethn, p_age) %>% 
-
-# Fix the factor levels so the facets display correctly
-  mutate(Education = factor(Education, levels = c("Grade school", "High school", "Some college or trade school",
-                                                  "Bachelors' degree", "Graduate or Professional Degree")),
-         Likely = factor(Likely, levels = c("Already voted", "Almost certain", "Very likely", "Somewhat likely", "Not very likely",
-                                            "Not at all likely")),
-         Race = factor(Race, levels = c("White", "Hispanic", "Black", "Asian", "Other")))
+# Read in the demographic data and join to df2
+demog <- read_csv("demog.csv")
+final <- demog %>%
+  inner_join(df2, by = "race") %>% 
+  
+# Find the absolute error amounts
+  mutate(
+    white_error = abs(white_pct - White),
+    black_error = abs(black_pct - Black),
+    hispanic_error = abs(hispanic_pct - Hispanic),
+    age_error = abs(age65andolder_pct - `65 and older`),
+    gender_error = abs(female_pct - Female),
+    edu_error = abs(lesscollege_pct - lesscollege),
+    d_error = abs(d_percent.a - d_percent.p),
+    r_error = abs(r_percent.a - r_percent.p)) %>% 
+  select(race, Prediction, d_error, r_error, white_error, black_error, hispanic_error,
+         age_error, gender_error, edu_error, total_population)
 
 # Write the data where R and the app can read it
-write_rds(final, "upshot/data.rds")
-write_rds(final, "data.rds")
+write_rds(final, "upshot/data2.rds")
+write_rds(final, "data2.rds")
