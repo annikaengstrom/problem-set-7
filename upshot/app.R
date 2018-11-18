@@ -106,7 +106,7 @@ server <- function(input, output) {
       input$char2 == "65+ error" ~ "age_error",
       input$char2 == "Some college or less error" ~ "edu_error")
     
-    ggplot(final, aes(get(Percent), d_error)) +
+    ggplot(df2, aes(get(Percent), d_error)) +
       geom_point(aes(col = Prediction)) +
       scale_color_manual(values=c("#009E73", "#f45642")) +
       geom_smooth(method = lm, se = FALSE) +
@@ -124,7 +124,7 @@ server <- function(input, output) {
       input$char2 == "65+ error" ~ "age_error",
       input$char2 == "Some college or less error" ~ "edu_error")
     
-    ggplot(final, aes(get(Percent), r_error)) +
+    ggplot(df2, aes(get(Percent), r_error)) +
       geom_point(aes(col = Prediction)) +
       scale_color_manual(values=c("#009E73", "#f45642")) +
       geom_smooth(method = lm, se = FALSE) +
