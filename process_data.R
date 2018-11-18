@@ -37,7 +37,7 @@ df <- df %>%
 
 ### In this section, clean up the poll data
 # Download the file
-download.file(url = "https://goo.gl/ZRCBda", destfile = "master.zip", quiet = TRUE, mode = "wb")
+download.file(url = "https://github.com/TheUpshot/2018-live-poll-results/archive/master.zip", destfile = "master.zip", quiet = TRUE, mode = "wb")
 unzip("master.zip")
 
 # Make a list of the files
