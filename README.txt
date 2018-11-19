@@ -1,0 +1,1 @@
+In order to generate the data.rds and data2.rds files, run each "process_data" file in order (process_data.R, process_data2.R, process_data3.R).
